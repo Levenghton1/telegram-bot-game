@@ -280,12 +280,11 @@
         function drawPipeWithCap(x, y, width, height, isTop) {
             ctx.save();
             
-            // Draw main pipe body with fixed brick pattern
+            // Draw main pipe body with brick pattern
             const brickHeight = 32;
             const brickPattern = Math.floor(y / brickHeight) * brickHeight;
             
             if (brickImage.complete) {
-                // Draw bricks aligned to grid
                 ctx.save();
                 ctx.translate(x, 0);
                 const pattern = ctx.createPattern(brickImage, 'repeat');
@@ -295,56 +294,53 @@
             }
 
             // Draw decorative cap
-            const capHeight = 32;
+            const capHeight = 24;
             const capWidth = width + 16;
             const capX = x - 8;
+            const ROUND_RADIUS = 8;
             
             if (isTop) {
                 // Bottom cap for top pipe
                 const capY = y + height - capHeight;
                 
-                // Draw main cap
                 if (brickImage.complete) {
                     ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(capX, capY + capHeight);
+                    ctx.lineTo(capX, capY + ROUND_RADIUS);
+                    ctx.quadraticCurveTo(capX, capY, capX + ROUND_RADIUS, capY);
+                    ctx.lineTo(capX + capWidth - ROUND_RADIUS, capY);
+                    ctx.quadraticCurveTo(capX + capWidth, capY, capX + capWidth, capY + ROUND_RADIUS);
+                    ctx.lineTo(capX + capWidth, capY + capHeight);
+                    ctx.clip();
+                    
                     ctx.translate(capX, 0);
                     const pattern = ctx.createPattern(brickImage, 'repeat');
                     ctx.fillStyle = pattern;
                     ctx.fillRect(0, capY, capWidth, capHeight);
                     ctx.restore();
                 }
-                
-                // Draw cap edges
-                ctx.strokeStyle = '#2d5202';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(capX, capY + capHeight);
-                ctx.lineTo(capX, capY);
-                ctx.lineTo(capX + capWidth, capY);
-                ctx.lineTo(capX + capWidth, capY + capHeight);
-                ctx.stroke();
             } else {
                 // Top cap for bottom pipe
                 const capY = y;
                 
-                // Draw main cap
                 if (brickImage.complete) {
                     ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(capX, capY);
+                    ctx.lineTo(capX, capY + capHeight - ROUND_RADIUS);
+                    ctx.quadraticCurveTo(capX, capY + capHeight, capX + ROUND_RADIUS, capY + capHeight);
+                    ctx.lineTo(capX + capWidth - ROUND_RADIUS, capY + capHeight);
+                    ctx.quadraticCurveTo(capX + capWidth, capY + capHeight, capX + capWidth, capY + capHeight - ROUND_RADIUS);
+                    ctx.lineTo(capX + capWidth, capY);
+                    ctx.clip();
+                    
                     ctx.translate(capX, 0);
                     const pattern = ctx.createPattern(brickImage, 'repeat');
                     ctx.fillStyle = pattern;
                     ctx.fillRect(0, capY, capWidth, capHeight);
                     ctx.restore();
                 }
-                
-                // Draw cap edges
-                ctx.strokeStyle = '#2d5202';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(capX, capY);
-                ctx.lineTo(capX, capY + capHeight);
-                ctx.lineTo(capX + capWidth, capY + capHeight);
-                ctx.lineTo(capX + capWidth, capY);
-                ctx.stroke();
             }
             
             ctx.restore();
