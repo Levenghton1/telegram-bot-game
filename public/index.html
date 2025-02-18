@@ -209,14 +209,42 @@
         let gameOver = false;
         let gameStarted = false;
 
+        function createPipe() {
+            const minHeight = MIN_PIPE_HEIGHT;
+            const maxHeight = canvas.height - GAP_HEIGHT - MIN_PIPE_HEIGHT;
+            const height = Math.random() * (maxHeight - minHeight) + minHeight;
+
+            return {
+                x: canvas.width + PIPE_WIDTH,
+                topHeight: height,
+                bottomY: height + GAP_HEIGHT,
+                width: PIPE_WIDTH,
+                passed: false
+            };
+        }
+
+        function checkCollision(pipe) {
+            const pigBox = {
+                left: pig.x - pig.radius * 0.7,
+                right: pig.x + pig.radius * 0.7,
+                top: pig.y - pig.radius * 0.7,
+                bottom: pig.y + pig.radius * 0.7
+            };
+
+            if (pigBox.right > pipe.x && pigBox.left < pipe.x + pipe.width) {
+                if (pigBox.top < pipe.topHeight || pigBox.bottom > pipe.bottomY) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // Загрузка изображений
         const backgroundImage = new Image();
         backgroundImage.src = 'static/images/background.png';
         backgroundImage.onload = function() {
-            // Store original aspect ratio
             const bgAspectRatio = this.width / this.height;
-            // Update background drawing
-            function drawBackground() {
+            window.drawBackground = function() {
                 const canvasAspectRatio = canvas.width / canvas.height;
                 let drawWidth = canvas.width;
                 let drawHeight = canvas.height;
@@ -232,18 +260,17 @@
                 }
 
                 ctx.drawImage(backgroundImage, x, y, drawWidth, drawHeight);
-            }
-            window.drawBackground = drawBackground;
+            };
         };
 
         const brickImage = new Image();
-        brickImage.src = 'static/images/bricks.png';  
+        brickImage.src = 'static/images/bricks.png';
 
         // Create animated pig sprite
         const pigSprites = [];
         for (let i = 1; i <= 3; i++) {
             const sprite = new Image();
-            sprite.src = `static/images/pig_wing${i}.png`;
+            sprite.src = `static/images/pig_wing${i}.svg`;
             pigSprites.push(sprite);
         }
         let currentPigFrame = 0;
@@ -251,9 +278,6 @@
         let lastFrameTime = 0;
 
         function drawPipeWithCap(x, y, width, height, isTop) {
-            const brickHeight = 20;
-            const brickRows = Math.ceil(height / brickHeight);
-            
             ctx.save();
             
             // Draw main column with rounded corners
@@ -290,7 +314,21 @@
             ctx.restore();
         }
 
-        function drawPig(x, y, rotation) {
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background
+            if (window.drawBackground) {
+                window.drawBackground();
+            }
+
+            // Draw pipes
+            pipes.forEach(pipe => {
+                drawPipeWithCap(pipe.x, 0, PIPE_WIDTH, pipe.topHeight, true);
+                drawPipeWithCap(pipe.x, pipe.bottomY, PIPE_WIDTH, canvas.height - pipe.bottomY, false);
+            });
+
+            // Draw animated pig
             const now = Date.now();
             if (now - lastFrameTime > ANIMATION_SPEED) {
                 currentPigFrame = (currentPigFrame + 1) % pigSprites.length;
@@ -298,13 +336,16 @@
             }
 
             ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(rotation);
+            ctx.translate(pig.x, pig.y);
+            ctx.rotate(pig.rotation);
             const sprite = pigSprites[currentPigFrame];
-            if (sprite.complete) { // Check if image is loaded
-                ctx.drawImage(sprite, -sprite.width/4, -sprite.height/4, sprite.width/2, sprite.height/2);
+            if (sprite.complete) {
+                ctx.drawImage(sprite, -pig.radius, -pig.radius, pig.radius * 2, pig.radius * 2);
             }
             ctx.restore();
+
+            // Update score display
+            updateScore();
         }
 
         function updateGame() {
@@ -371,25 +412,6 @@
             }
         }
 
-        function drawGame() {
-            // Clear the canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw background
-            if (window.drawBackground) {
-                window.drawBackground();
-            }
-
-            // Draw pipes
-            pipes.forEach(pipe => {
-                drawPipeWithCap(pipe.x, 0, PIPE_WIDTH, pipe.topHeight, true);
-                drawPipeWithCap(pipe.x, pipe.bottomY, PIPE_WIDTH, canvas.height - pipe.bottomY, false);
-            });
-
-            // Draw pig
-            drawPig(pig.x, pig.y, pig.rotation);
-        }
-
         function updateScore() {
             document.getElementById('score').textContent = score;
             document.getElementById('lives').textContent = lives;
@@ -441,7 +463,9 @@
         const resources = {
             images: [
                 { name: 'Background', src: 'static/images/background.png' },
-                { name: 'Pig', src: 'static/images/pig.svg' },
+                { name: 'Pig', src: 'static/images/pig_wing1.svg' },
+                { name: 'Pig', src: 'static/images/pig_wing2.svg' },
+                { name: 'Pig', src: 'static/images/pig_wing3.svg' },
                 { name: 'Bricks', src: 'static/images/bricks.png' }
             ],
             audio: [

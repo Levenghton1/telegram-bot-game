@@ -4,8 +4,8 @@
     <rect x="16" y="16" width="32" height="32" rx="16" fill="#FFB6C1"/>
     
     <!-- Wings middle -->
-    <path d="M12 32 L4 32 L12 24 L20 32 L12 32" fill="#FFB6C1"/>
-    <path d="M52 32 L44 32 L52 24 L60 32 L52 32" fill="#FFB6C1"/>
+    <rect x="12" y="20" width="4" height="8" fill="#FFB6C1"/>
+    <rect x="48" y="20" width="4" height="8" fill="#FFB6C1"/>
     
     <!-- Eyes -->
     <circle cx="24" cy="28" r="4" fill="black"/>
