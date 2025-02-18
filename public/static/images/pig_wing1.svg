@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+    <!-- Body -->
+    <rect x="16" y="16" width="32" height="32" rx="16" fill="#FFB6C1"/>
+    
+    <!-- Wings up -->
+    <path d="M12 24 L4 16 L12 8 L20 16 L12 24" fill="#FFB6C1"/>
+    <path d="M52 24 L44 16 L52 8 L60 16 L52 24" fill="#FFB6C1"/>
+    
+    <!-- Eyes -->
+    <circle cx="24" cy="28" r="4" fill="black"/>
+    <circle cx="40" cy="28" r="4" fill="black"/>
+    
+    <!-- Nose -->
+    <ellipse cx="32" cy="36" rx="6" ry="4" fill="#FF69B4"/>
+</svg>
