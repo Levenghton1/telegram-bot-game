@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Body -->
+    <ellipse cx="50" cy="50" rx="35" ry="30" fill="#FFB6C1"/>
+    
+    <!-- Wings (Up position) -->
+    <path d="M 25 45 Q 15 35 20 25 Q 25 20 35 30" fill="#FFD1DC" stroke="#FF69B4" stroke-width="2"/>
+    <path d="M 75 45 Q 85 35 80 25 Q 75 20 65 30" fill="#FFD1DC" stroke="#FF69B4" stroke-width="2"/>
+    
+    <!-- Ears (Up position) -->
+    <path d="M 35 25 Q 40 15 45 25" fill="#FFB6C1" stroke="#FF69B4" stroke-width="2"/>
+    <path d="M 65 25 Q 60 15 55 25" fill="#FFB6C1" stroke="#FF69B4" stroke-width="2"/>
+    
+    <!-- Face -->
+    <circle cx="40" cy="45" r="5" fill="black"/> <!-- Left eye -->
+    <circle cx="60" cy="45" r="5" fill="black"/> <!-- Right eye -->
+    <ellipse cx="50" cy="55" rx="12" ry="8" fill="#FF69B4"/> <!-- Snout -->
+    <circle cx="46" cy="55" r="3" fill="black"/> <!-- Left nostril -->
+    <circle cx="54" cy="55" r="3" fill="black"/> <!-- Right nostril -->
+</svg>

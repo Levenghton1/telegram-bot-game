@@ -82,9 +82,51 @@
             background: rgba(255, 255, 255, 0.9);
             transform: translateY(-2px);
         }
+        /* Loading screen styles */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #6B4423;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+        }
+        .loading-progress {
+            width: 80%;
+            max-width: 300px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #FFD700;
+            transition: width 0.3s ease;
+        }
+        .loading-text {
+            margin-top: 10px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
+    <!-- Add loading screen -->
+    <div id="loading-screen">
+        <h2>Loading Game...</h2>
+        <div class="loading-progress">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="loading-text">Checking resources...</div>
+    </div>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div class="stats">
@@ -111,6 +153,9 @@
         const ctx = canvas.getContext('2d');
         const playButton = document.getElementById('playButton');
         const soundToggle = document.getElementById('soundToggle');
+        const loadingScreen = document.getElementById('loading-screen');
+        const progressBar = document.querySelector('.progress-bar');
+        const loadingText = document.querySelector('.loading-text');
         
         // Инициализация аудио
         const bgMusic = new Audio('static/audio/oats.mp3');
@@ -136,22 +181,22 @@
         resizeCanvas();
 
         // Игровые константы с уменьшенными скоростями
-        const GRAVITY = 0.25;
-        const INITIAL_JUMP_FORCE = -5;
-        const NORMAL_JUMP_FORCE = -4;
-        const PIPE_SPEED = 1.2;
-        const PIPE_SPAWN_INTERVAL = 3000;
-        const PIPE_WIDTH = 60;
-        const GAP_HEIGHT = 170;
+        const GRAVITY = 0.4;
+        const NORMAL_JUMP_FORCE = -8;
+        const PIPE_SPEED = 2;
+        const PIPE_SPAWN_INTERVAL = 2000;
+        const PIPE_WIDTH = 50;
         const MIN_PIPE_HEIGHT = 50;
-        const PIPE_CAP_HEIGHT = 30;
-
+        const PIPE_GAP = 150;
+        
         let pig = {
-            x: canvas.width * 0.2,
-            y: canvas.height * 0.4,
-            radius: 20,
-            velocity: INITIAL_JUMP_FORCE,
-            rotation: 0
+            x: canvas.width / 3,
+            y: canvas.height / 2,
+            width: 50,
+            height: 50,
+            velocity: 0,
+            frame: 1,  // Added for animation
+            frameTimer: 0  // Added for animation timing
         };
 
         let pipes = [];
@@ -191,7 +236,7 @@
             }
 
             // Декоративная верхушка с текстурой
-            const capY = isTop ? y + height - PIPE_CAP_HEIGHT : y;
+            const capY = isTop ? y + height - 30 : y;
             
             // Рисуем основу верхушки с текстурой
             const pattern = ctx.createPattern(brickImage, 'repeat');
@@ -200,7 +245,7 @@
             ctx.save();
             // Рисуем центральную часть верхушки
             ctx.translate(x - 5, capY);
-            ctx.fillRect(0, 0, width + 10, PIPE_CAP_HEIGHT);
+            ctx.fillRect(0, 0, width + 10, 30);
             
             // Добавляем тени для объема
             ctx.fillStyle = 'rgba(107, 68, 35, 0.3)';  // Темно-коричневый с прозрачностью
@@ -208,19 +253,19 @@
             ctx.fillRect(0, 0, width + 10, 2);
             // Нижняя подсветка
             ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.fillRect(0, PIPE_CAP_HEIGHT - 2, width + 10, 2);
+            ctx.fillRect(0, 28, width + 10, 2);
             
             // Боковые грани
             ctx.fillStyle = 'rgba(107, 68, 35, 0.2)';
-            ctx.fillRect(0, 0, 3, PIPE_CAP_HEIGHT); // Левая грань
-            ctx.fillRect(width + 7, 0, 3, PIPE_CAP_HEIGHT); // Правая грань
+            ctx.fillRect(0, 0, 3, 30); // Левая грань
+            ctx.fillRect(width + 7, 0, 3, 30); // Правая грань
             
             ctx.restore();
         }
 
         function createPipe() {
             const minHeight = MIN_PIPE_HEIGHT;
-            const maxHeight = canvas.height - GAP_HEIGHT - MIN_PIPE_HEIGHT;
+            const maxHeight = canvas.height - PIPE_GAP - MIN_PIPE_HEIGHT;
             const height = Math.random() * (maxHeight - minHeight) + minHeight;
 
             return {
@@ -233,10 +278,10 @@
 
         function checkCollision(pipe) {
             const pigBox = {
-                left: pig.x - pig.radius * 0.7,
-                right: pig.x + pig.radius * 0.7,
-                top: pig.y - pig.radius * 0.7,
-                bottom: pig.y + pig.radius * 0.7
+                left: pig.x - pig.width/2,
+                right: pig.x + pig.width/2,
+                top: pig.y - pig.height/2,
+                bottom: pig.y + pig.height/2
             };
 
             // Проверка столкновения с верхней трубой
@@ -244,7 +289,7 @@
                 if (pigBox.top < pipe.topHeight) {
                     return true;
                 }
-                if (pigBox.bottom > pipe.topHeight + GAP_HEIGHT) {
+                if (pigBox.bottom > pipe.topHeight + PIPE_GAP) {
                     return true;
                 }
             }
@@ -266,7 +311,7 @@
             pig.rotation = Math.min(Math.PI/4, Math.max(-Math.PI/4, pig.velocity * 0.1));
 
             // Проверка границ
-            if (pig.y + pig.radius > canvas.height - 60) {
+            if (pig.y + pig.height/2 > canvas.height - 60) {
                 gameOver = true;
                 if (score > highScore) {
                     highScore = score;
@@ -278,8 +323,8 @@
                 return;
             }
 
-            if (pig.y - pig.radius < 0) {
-                pig.y = pig.radius;
+            if (pig.y - pig.height/2 < 0) {
+                pig.y = pig.height/2;
                 pig.velocity = 0;
             }
 
@@ -319,10 +364,21 @@
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Отрисовка фона
-            if (backgroundImage.complete) {
-                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+            // Update pig animation frame
+            pig.frameTimer += 1;
+            if (pig.frameTimer > 10) {  // Change frame every 10 game ticks
+                pig.frame = pig.frame === 1 ? 2 : 1;
+                pig.frameTimer = 0;
             }
+            
+            // Draw background
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw pig with current frame
+            const pigImage = new Image();
+            pigImage.src = `static/images/pig_frame${pig.frame}.svg`;
+            ctx.drawImage(pigImage, pig.x - pig.width/2, pig.y - pig.height/2, pig.width, pig.height);
 
             // Отрисовка труб
             pipes.forEach(pipe => {
@@ -336,19 +392,12 @@
                 drawPipeWithCap(pipe.x, 0, pipe.width, pipe.topHeight, true);
                 
                 // Нижняя труба
-                const bottomPipeStart = pipe.topHeight + GAP_HEIGHT;
+                const bottomPipeStart = pipe.topHeight + PIPE_GAP;
                 drawPipeWithCap(pipe.x, bottomPipeStart, pipe.width, 
                               canvas.height - bottomPipeStart, false);
                 
                 ctx.restore();
             });
-
-            // Отрисовка свинки
-            ctx.save();
-            ctx.translate(pig.x, pig.y);
-            ctx.rotate(pig.rotation);
-            ctx.drawImage(pigImage, -pig.radius, -pig.radius, pig.radius * 2, pig.radius * 2);
-            ctx.restore();
 
             updateScore();
         }
@@ -360,8 +409,8 @@
         }
 
         function resetPigPosition() {
-            pig.y = canvas.height * 0.4;
-            pig.velocity = INITIAL_JUMP_FORCE;
+            pig.y = canvas.height / 2;
+            pig.velocity = 0;
             pig.rotation = 0;
             pipes = [];
         }
@@ -400,13 +449,114 @@
             }
         });
 
-        function gameLoop() {
-            updateGame();
-            drawGame();
-            requestAnimationFrame(gameLoop);
+        // Game resources to check
+        const resources = {
+            images: [
+                { name: 'Background', src: 'static/images/background.png' },
+                { name: 'Pig', src: 'static/images/pig.svg' },
+                { name: 'Bricks', src: 'static/images/bricks.png' }
+            ],
+            audio: [
+                { name: 'Background Music', src: 'static/audio/oats.mp3' }
+            ],
+            scripts: [
+                { name: 'Menu Script', src: 'static/js/menu.js' }
+            ]
+        };
+
+        // Function to check if a file exists
+        async function checkResource(resource) {
+            try {
+                const response = await fetch(resource.src, {
+                    method: 'HEAD',  // Only fetch headers to check existence
+                    cache: 'no-cache' // Prevent caching issues
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return { success: true };
+            } catch (error) {
+                return { 
+                    success: false, 
+                    error: `Failed to load ${resource.name} (${resource.src}): ${error.message}`
+                };
+            }
         }
 
-        gameLoop();
+        // Function to check all resources
+        async function checkAllResources() {
+            const totalResources = resources.images.length + resources.audio.length + resources.scripts.length;
+            let loadedResources = 0;
+            let errors = [];
+
+            // Check images
+            for (const img of resources.images) {
+                loadingText.textContent = `Checking ${img.name}...`;
+                const result = await checkResource(img);
+                if (result.success) {
+                    loadedResources++;
+                    progressBar.style.width = `${(loadedResources / totalResources) * 100}%`;
+                } else {
+                    errors.push(result.error);
+                }
+            }
+
+            // Check audio
+            for (const audio of resources.audio) {
+                loadingText.textContent = `Checking ${audio.name}...`;
+                const result = await checkResource(audio);
+                if (result.success) {
+                    loadedResources++;
+                    progressBar.style.width = `${(loadedResources / totalResources) * 100}%`;
+                } else {
+                    errors.push(result.error);
+                }
+            }
+
+            // Check scripts
+            for (const script of resources.scripts) {
+                loadingText.textContent = `Checking ${script.name}...`;
+                const result = await checkResource(script);
+                if (result.success) {
+                    loadedResources++;
+                    progressBar.style.width = `${(loadedResources / totalResources) * 100}%`;
+                } else {
+                    errors.push(result.error);
+                }
+            }
+
+            return { success: errors.length === 0, errors };
+        }
+
+        // Initialize game only after resources are checked
+        async function initializeGame() {
+            const result = await checkAllResources();
+            
+            if (!result.success) {
+                loadingText.innerHTML = 'Failed to load resources:<br>' + 
+                    result.errors.map(err => `• ${err}`).join('<br>') +
+                    '<br><br>Please check your connection and refresh the page.';
+                progressBar.style.backgroundColor = '#ff4444';
+                return;
+            }
+
+            loadingText.textContent = 'All resources loaded!';
+            progressBar.style.width = '100%';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                // Initialize the rest of the game
+                function gameLoop() {
+                    updateGame();
+                    drawGame();
+                    requestAnimationFrame(gameLoop);
+                }
+
+                gameLoop();
+            }, 500);
+        }
+
+        // Start loading process
+        window.addEventListener('load', initializeGame);
     </script>
 </body>
 </html>
