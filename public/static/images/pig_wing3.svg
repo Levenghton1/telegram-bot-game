@@ -1,16 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-    <!-- Body -->
-    <rect x="16" y="16" width="32" height="32" rx="16" fill="#FFB6C1"/>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .pixel { shape-rendering: crispEdges; }
+    </style>
+    
+    <!-- Body (rounded square) -->
+    <path class="pixel" d="
+        M10 8 h12
+        M8 10 h16
+        M8 12 h16
+        M8 14 h16
+        M8 16 h16
+        M8 18 h16
+        M8 20 h16
+        M10 22 h12"
+        fill="#FFB6C1"/>
     
     <!-- Wings down -->
-    <rect x="12" y="36" width="8" height="16" fill="#FFB6C1"/>
-    <rect x="44" y="36" width="8" height="16" fill="#FFB6C1"/>
+    <path class="pixel" d="
+        M4 18 h4
+        M4 20 h4
+        M4 22 h4
+        M4 24 h4"
+        fill="#FFB6C1"/>
+    <path class="pixel" d="
+        M24 18 h4
+        M24 20 h4
+        M24 22 h4
+        M24 24 h4"
+        fill="#FFB6C1"/>
     
     <!-- Eyes -->
-    <circle cx="24" cy="28" r="4" fill="black"/>
-    <circle cx="40" cy="28" r="4" fill="black"/>
+    <rect class="pixel" x="11" y="13" width="2" height="2" fill="black"/>
+    <rect class="pixel" x="19" y="13" width="2" height="2" fill="black"/>
     
     <!-- Nose -->
-    <ellipse cx="32" cy="36" rx="6" ry="4" fill="#FF69B4"/>
+    <rect class="pixel" x="14" y="17" width="4" height="2" fill="#FF69B4"/>
 </svg>
