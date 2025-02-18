@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 // Функция для отправки сообщений в Telegram
 async function sendTelegramMessage(chatId, text, keyboard = null) {
-  const BOT_TOKEN = process.env.BOT_TOKEN;
+  const BOT_TOKEN = process.env.BOT_TOKEN || '7737881736:AAEsMZRD_QsO7xGO49hVHzQtCCSkpmFaPlU';
   const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
   
   const data = {
@@ -32,18 +32,25 @@ async function sendTelegramMessage(chatId, text, keyboard = null) {
 
 // Функция для создания клавиатуры
 function getMainKeyboard() {
+  const GAME_URL = process.env.GAME_URL || 'https://moonlit-otter-5f1bc7.netlify.app';
   return {
     inline_keyboard: [
-      [{ text: "🎮 Играть", web_app: { url: process.env.GAME_URL || "https://your-netlify-url.netlify.app" } }],
+      [{ text: "🎮 Играть", web_app: { url: `${GAME_URL}/index.html` } }],
       [
         { text: "🏆 Таблица лидеров", callback_data: "leaderboard" },
         { text: "❓ Как играть", callback_data: "how_to_play" }
+      ],
+      [
+        { text: "👥 Сообщество", callback_data: "community" },
+        { text: "🛍️ Магазин", callback_data: "shop" }
       ]
     ]
   };
 }
 
 export async function handler(event) {
+  console.log('Function started, method:', event.httpMethod);
+  
   // Проверяем метод
   if (event.httpMethod !== 'POST') {
     return {
@@ -139,6 +146,32 @@ export async function handler(event) {
             "• Не лети слишком высоко\n" +
             "• Рассчитывай траекторию\n" +
             "• Следи за следующей колонной",
+            getMainKeyboard()
+          );
+          break;
+
+        case 'community':
+          await sendTelegramMessage(
+            chatId,
+            "👥 *Сообщество Flying Pig Game*\n\n" +
+            "Присоединяйтесь к нашему сообществу игроков!\n\n" +
+            "• Делитесь своими рекордами\n" +
+            "• Обсуждайте стратегии\n" +
+            "• Находите новых друзей\n\n" +
+            "🌟 Вместе веселее!",
+            getMainKeyboard()
+          );
+          break;
+
+        case 'shop':
+          await sendTelegramMessage(
+            chatId,
+            "🛍️ *Магазин*\n\n" +
+            "Скоро здесь появятся:\n" +
+            "• Новые скины для свинки\n" +
+            "• Особые способности\n" +
+            "• Бустеры и бонусы\n\n" +
+            "Следите за обновлениями! ✨",
             getMainKeyboard()
           );
           break;

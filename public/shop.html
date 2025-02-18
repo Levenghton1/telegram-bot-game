@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shop - Flying Pig Game</title>
+    <link rel="stylesheet" href="static/css/common.css">
+    <style>
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(107, 68, 35, 0.1);
+            border-radius: 10px;
+        }
+        .shop-item-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .shop-item-info h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .shop-item-info p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .current-lives {
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+            color: #6B4423;
+        }
+    </style>
+</head>
+<body>
+    <img src="static/images/background.png" class="background-image">
+    <div class="container">
+        <div class="card">
+            <h1 class="card-title">Shop</h1>
+            <div class="current-lives">
+                <span> Current Lives: </span>
+                <span id="currentLives">20</span>
+            </div>
+            <div class="shop-item">
+                <div class="shop-item-info">
+                    <span style="font-size: 24px;"> </span>
+                    <div>
+                        <h3>5 Lives</h3>
+                        <p>Get 5 extra lives</p>
+                    </div>
+                </div>
+                <button class="button" onclick="buyLives(5)">Buy</button>
+            </div>
+            <div class="shop-item">
+                <div class="shop-item-info">
+                    <span style="font-size: 24px;"></span>
+                    <div>
+                        <h3>20 Lives</h3>
+                        <p>Get 20 extra lives</p>
+                    </div>
+                </div>
+                <button class="button" onclick="buyLives(20)">Buy</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/menu.js"></script>
+    <script>
+        function updateLives() {
+            const currentLives = parseInt(localStorage.getItem('totalLives')) || 20;
+            document.getElementById('currentLives').textContent = currentLives;
+        }
+
+        function buyLives(amount) {
+            const currentLives = parseInt(localStorage.getItem('totalLives')) || 20;
+            localStorage.setItem('totalLives', currentLives + amount);
+            updateLives();
+            alert(`Successfully purchased ${amount} lives!`);
+        }
+
+        updateLives();
+    </script>
+</body>
+</html>

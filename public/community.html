@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Community - Flying Pig Game</title>
+    <link rel="stylesheet" href="static/css/common.css">
+    <style>
+        .community-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .community-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(107, 68, 35, 0.1);
+            border-radius: 10px;
+            color: #6B4423;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .community-link:hover {
+            background: rgba(107, 68, 35, 0.2);
+            transform: translateY(-2px);
+        }
+        .community-link-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .community-link-icon {
+            font-size: 24px;
+        }
+        .community-link-info h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .community-link-info p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <img src="static/images/background.png" class="background-image">
+    <div class="container">
+        <div class="card">
+            <h1 class="card-title">Community</h1>
+            <div class="community-links">
+                <a href="https://t.me/your_channel" class="community-link">
+                    <div class="community-link-content">
+                        <span class="community-link-icon">📢</span>
+                        <div class="community-link-info">
+                            <h3>Telegram Channel</h3>
+                            <p>Get the latest news and updates</p>
+                        </div>
+                    </div>
+                    <span>→</span>
+                </a>
+                <a href="https://t.me/your_chat" class="community-link">
+                    <div class="community-link-content">
+                        <span class="community-link-icon">💬</span>
+                        <div class="community-link-info">
+                            <h3>Telegram Chat</h3>
+                            <p>Chat with other players</p>
+                        </div>
+                    </div>
+                    <span>→</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/menu.js"></script>
+</body>
+</html>

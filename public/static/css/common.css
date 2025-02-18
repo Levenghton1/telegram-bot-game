@@ -1,0 +1,121 @@
+/* Общие стили */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: #F5E6D3;
+    font-family: Arial, sans-serif;
+    color: #6B4423;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+/* Меню */
+.menu-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(107, 68, 35, 0.9);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.menu-item {
+    color: white;
+    text-decoration: none;
+    font-size: 24px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Карточки */
+.card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    color: #6B4423;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.card-item {
+    background: rgba(107, 68, 35, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Кнопки */
+.button {
+    background: #6B4423;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.button:hover {
+    background: #8B5E3C;
+    transform: translateY(-2px);
+}
+
+.play-button {
+    background: #6B4423;
+    color: white;
+    border: none;
+    padding: 20px 60px;
+    border-radius: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.play-button:hover {
+    background: #8B5E3C;
+    transform: translate(-50%, -52%);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
