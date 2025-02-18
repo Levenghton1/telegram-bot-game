@@ -49,12 +49,14 @@
             font-size: 24px;
             font-weight: bold;
             cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             z-index: 100;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
         }
         .play-button:hover {
-            transform: translate(-50%, -50%) scale(1.05);
+            background: #8B5E3C;
+            transform: translate(-50%, -52%);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
         .sound-toggle {
             position: fixed;
@@ -83,9 +85,8 @@
     </style>
 </head>
 <body>
-    <img src="static/images/background.png" class="background-image">
-
     <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
         <div class="stats">
             <div class="stat-item">
                 <span>🏆</span>
@@ -100,21 +101,11 @@
                 <span id="lives">20</span>
             </div>
         </div>
-
-        <canvas id="gameCanvas"></canvas>
         <button id="playButton" class="play-button">PLAY</button>
         <button id="soundToggle" class="sound-toggle">🔊</button>
     </div>
 
-    <div id="leaderboard">
-        <h2>🏆 Таблица лидеров</h2>
-        <div class="leaderboard-loading">
-            <div>Загрузка таблицы лидеров...</div>
-        </div>
-    </div>
-
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="static/js/game-service.js"></script>
+    <script src="static/js/menu.js"></script>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -144,7 +135,7 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Игровые константы
+        // Игровые константы с уменьшенными скоростями
         const GRAVITY = 0.25;
         const INITIAL_JUMP_FORCE = -5;
         const NORMAL_JUMP_FORCE = -4;
@@ -248,6 +239,7 @@
                 bottom: pig.y + pig.radius * 0.7
             };
 
+            // Проверка столкновения с верхней трубой
             if (pigBox.right > pipe.x - 5 && pigBox.left < pipe.x + pipe.width + 5) {
                 if (pigBox.top < pipe.topHeight) {
                     return true;
@@ -415,12 +407,6 @@
         }
 
         gameLoop();
-
-        // Инициализация пользователя
-        const gameService = new GameService();
-        if (window.Telegram && window.Telegram.WebApp.initDataUnsafe.user) {
-            gameService.initializeUser(window.Telegram.WebApp.initDataUnsafe.user);
-        }
     </script>
 </body>
 </html>
