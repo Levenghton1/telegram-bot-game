@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Profile - Flying Pig Game</title>
+    <link rel="stylesheet" href="static/css/common.css">
+</head>
+<body>
+    <img src="static/images/background.png" class="background-image">
+    <div class="container">
+        <div class="card">
+            <h1 class="card-title">Profile</h1>
+            <div class="card-item">
+                <div>
+                    <span>🎮</span>
+                    <span>Total Games</span>
+                </div>
+                <span id="totalGames" class="stat-value">0</span>
+            </div>
+            <div class="card-item">
+                <div>
+                    <span>🏆</span>
+                    <span>High Score</span>
+                </div>
+                <span id="highScore" class="stat-value">0</span>
+            </div>
+            <div class="card-item">
+                <div>
+                    <span>❤️</span>
+                    <span>Total Lives</span>
+                </div>
+                <span id="totalLives" class="stat-value">20</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-bar">
+        <a href="index.html" class="menu-item">Game</a>
+        <a href="shop.html" class="menu-item">Shop</a>
+        <a href="leaders.html" class="menu-item">Leaders</a>
+        <a href="profile.html" class="menu-item active">Profile</a>
+        <a href="community.html" class="menu-item">Community</a>
+    </div>
+
+    <script src="static/js/menu.js"></script>
+    <script>
+        document.getElementById('totalGames').textContent = localStorage.getItem('totalGames') || 0;
+        document.getElementById('highScore').textContent = localStorage.getItem('highScore') || 0;
+        document.getElementById('totalLives').textContent = localStorage.getItem('totalLives') || 20;
+    </script>
+</body>
+</html>

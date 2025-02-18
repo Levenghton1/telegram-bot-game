@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Leaderboard - Flying Pig Game</title>
+    <link rel="stylesheet" href="static/css/common.css">
+</head>
+<body>
+    <img src="static/images/background.png" class="background-image">
+    <div class="container">
+        <div class="card">
+            <h1 class="card-title">Leaderboard</h1>
+            <div id="leaderboardList">
+                <!-- Лидерборд будет заполнен динамически -->
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-bar">
+        <a href="index.html" class="menu-item">Game</a>
+        <a href="shop.html" class="menu-item">Shop</a>
+        <a href="leaders.html" class="menu-item">Leaders</a>
+        <a href="profile.html" class="menu-item">Profile</a>
+        <a href="community.html" class="menu-item">Community</a>
+    </div>
+
+    <script src="static/js/menu.js"></script>
+    <script>
+        const leaderboardData = JSON.parse(localStorage.getItem('leaderboard')) || [];
+        const leaderboardList = document.getElementById('leaderboardList');
+        
+        leaderboardData.sort((a, b) => b.score - a.score).slice(0, 10).forEach((item, index) => {
+            const leaderItem = document.createElement('div');
+            leaderItem.className = 'card-item';
+            leaderItem.innerHTML = `
+                <div>
+                    <span class="rank"> ${index + 1}</span>
+                    <span>${item.name || 'Player'}</span>
+                </div>
+                <span class="stat-value">${item.score}</span>
+            `;
+            leaderboardList.appendChild(leaderItem);
+        });
+
+        if (leaderboardData.length === 0) {
+            const emptyItem = document.createElement('div');
+            emptyItem.className = 'card-item';
+            emptyItem.innerHTML = '<span>No scores yet. Be the first!</span>';
+            leaderboardList.appendChild(emptyItem);
+        }
+    </script>
+</body>
+</html>
