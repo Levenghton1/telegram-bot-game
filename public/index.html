@@ -82,9 +82,51 @@
             background: rgba(255, 255, 255, 0.9);
             transform: translateY(-2px);
         }
+        /* Loading screen styles */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #6B4423;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+        }
+        .loading-progress {
+            width: 80%;
+            max-width: 300px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #FFD700;
+            transition: width 0.3s ease;
+        }
+        .loading-text {
+            margin-top: 10px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
+    <!-- Add loading screen -->
+    <div id="loading-screen">
+        <h2>Loading Game...</h2>
+        <div class="loading-progress">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="loading-text">Checking resources...</div>
+    </div>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div class="stats">
@@ -111,6 +153,9 @@
         const ctx = canvas.getContext('2d');
         const playButton = document.getElementById('playButton');
         const soundToggle = document.getElementById('soundToggle');
+        const loadingScreen = document.getElementById('loading-screen');
+        const progressBar = document.querySelector('.progress-bar');
+        const loadingText = document.querySelector('.loading-text');
         
         // Инициализация аудио
         const bgMusic = new Audio('static/audio/oats.mp3');
@@ -400,13 +445,99 @@
             }
         });
 
-        function gameLoop() {
-            updateGame();
-            drawGame();
-            requestAnimationFrame(gameLoop);
+        // Game resources to check
+        const resources = {
+            images: [
+                { name: 'Background', src: 'static/images/background.png' },
+                { name: 'Pig', src: 'static/images/pig.svg' },
+                { name: 'Bricks', src: 'static/images/bricks.png' }
+            ],
+            audio: [
+                { name: 'Background Music', src: 'static/audio/oats.mp3' }
+            ],
+            scripts: [
+                { name: 'Menu Script', src: 'static/js/menu.js' }
+            ]
+        };
+
+        // Function to check if a file exists
+        async function checkResource(resource) {
+            try {
+                const response = await fetch(resource.src);
+                if (!response.ok) throw new Error(`Failed to load ${resource.name}`);
+                return true;
+            } catch (error) {
+                loadingText.textContent = `Error loading ${resource.name}`;
+                console.error(error);
+                return false;
+            }
         }
 
-        gameLoop();
+        // Function to check all resources
+        async function checkAllResources() {
+            const totalResources = resources.images.length + resources.audio.length + resources.scripts.length;
+            let loadedResources = 0;
+
+            // Check images
+            for (const img of resources.images) {
+                loadingText.textContent = `Checking ${img.name}...`;
+                if (await checkResource(img)) {
+                    loadedResources++;
+                    progressBar.style.width = `${(loadedResources / totalResources) * 100}%`;
+                } else {
+                    return false;
+                }
+            }
+
+            // Check audio
+            for (const audio of resources.audio) {
+                loadingText.textContent = `Checking ${audio.name}...`;
+                if (await checkResource(audio)) {
+                    loadedResources++;
+                    progressBar.style.width = `${(loadedResources / totalResources) * 100}%`;
+                } else {
+                    return false;
+                }
+            }
+
+            // Check scripts
+            for (const script of resources.scripts) {
+                loadingText.textContent = `Checking ${script.name}...`;
+                if (await checkResource(script)) {
+                    loadedResources++;
+                    progressBar.style.width = `${(loadedResources / totalResources) * 100}%`;
+                } else {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Initialize game only after resources are checked
+        async function initializeGame() {
+            const resourcesLoaded = await checkAllResources();
+            
+            if (!resourcesLoaded) {
+                loadingText.textContent = 'Failed to load some resources. Please refresh the page.';
+                return;
+            }
+
+            loadingText.textContent = 'All resources loaded!';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                // Initialize the rest of the game
+                function gameLoop() {
+                    updateGame();
+                    drawGame();
+                    requestAnimationFrame(gameLoop);
+                }
+
+                gameLoop();
+            }, 500);
+        }
+
+        initializeGame();
     </script>
 </body>
 </html>
