@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .pixel { shape-rendering: crispEdges; }
+    </style>
+    
+    <!-- Body (rounded square) -->
+    <path class="pixel" d="
+        M10 8 h12
+        M8 10 h16
+        M8 12 h16
+        M8 14 h16
+        M8 16 h16
+        M8 18 h16
+        M8 20 h16
+        M10 22 h12"
+        fill="#FFB6C1"/>
+    
+    <!-- Wings down -->
+    <path class="pixel" d="
+        M4 18 h4
+        M4 20 h4
+        M4 22 h4
+        M4 24 h4"
+        fill="#FFB6C1"/>
+    <path class="pixel" d="
+        M24 18 h4
+        M24 20 h4
+        M24 22 h4
+        M24 24 h4"
+        fill="#FFB6C1"/>
+    
+    <!-- Eyes -->
+    <rect class="pixel" x="11" y="13" width="2" height="2" fill="black"/>
+    <rect class="pixel" x="19" y="13" width="2" height="2" fill="black"/>
+    
+    <!-- Nose -->
+    <rect class="pixel" x="14" y="17" width="4" height="2" fill="#FF69B4"/>
+</svg>
