@@ -239,111 +239,17 @@
             return false;
         }
 
-        // Загрузка изображений
-        const backgroundImage = new Image();
-        backgroundImage.src = 'static/images/background.png';
-        backgroundImage.onload = function() {
-            const bgAspectRatio = this.width / this.height;
-            window.drawBackground = function() {
-                const canvasAspectRatio = canvas.width / canvas.height;
-                let drawWidth = canvas.width;
-                let drawHeight = canvas.height;
-                let x = 0;
-                let y = 0;
-
-                if (canvasAspectRatio > bgAspectRatio) {
-                    drawHeight = canvas.width / bgAspectRatio;
-                    y = (canvas.height - drawHeight) / 2;
-                } else {
-                    drawWidth = canvas.height * bgAspectRatio;
-                    x = (canvas.width - drawWidth) / 2;
-                }
-
-                ctx.drawImage(backgroundImage, x, y, drawWidth, drawHeight);
-            };
-        };
-
-        const brickImage = new Image();
-        brickImage.src = 'static/images/bricks.png';
-
         // Create animated pig sprite
         const pigSprites = [];
-        const version = Date.now(); // Add version to prevent caching
         for (let i = 1; i <= 3; i++) {
             const sprite = new Image();
-            sprite.src = `static/images/pig_wing${i}.svg?v=${version}`;
+            sprite.src = `static/images/pig_wing${i}.svg`;
+            sprite.crossOrigin = 'anonymous'; // Добавляем для предотвращения проблем с кэшированием
             pigSprites.push(sprite);
         }
         let currentPigFrame = 0;
         const ANIMATION_SPEED = 150; // ms per frame
         let lastFrameTime = 0;
-
-        function drawPipeWithCap(x, y, width, height, isTop) {
-            ctx.save();
-            
-            // Draw main pipe body with brick pattern
-            const brickHeight = 32;
-            const brickPattern = Math.floor(y / brickHeight) * brickHeight;
-            
-            if (brickImage.complete) {
-                ctx.save();
-                ctx.translate(x, 0);
-                const pattern = ctx.createPattern(brickImage, 'repeat');
-                ctx.fillStyle = pattern;
-                ctx.fillRect(0, y, width, height); 
-                ctx.restore();
-            }
-
-            // Draw decorative cap
-            const capHeight = 24;
-            const capWidth = width + 16;
-            const capX = x - 8;
-            const ROUND_RADIUS = 8;
-            
-            if (isTop) {
-                // Bottom cap for top pipe - exactly at the bottom
-                const capY = y + height - capHeight;
-                
-                if (brickImage.complete) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.moveTo(capX, capY + capHeight);
-                    ctx.lineTo(capX, capY + ROUND_RADIUS);
-                    ctx.quadraticCurveTo(capX, capY, capX + ROUND_RADIUS, capY);
-                    ctx.lineTo(capX + capWidth - ROUND_RADIUS, capY);
-                    ctx.quadraticCurveTo(capX + capWidth, capY, capX + capWidth, capY + ROUND_RADIUS);
-                    ctx.lineTo(capX + capWidth, capY + capHeight);
-                    ctx.closePath();
-                    
-                    const pattern = ctx.createPattern(brickImage, 'repeat');
-                    ctx.fillStyle = pattern;
-                    ctx.fill();
-                    ctx.restore();
-                }
-            } else {
-                // Top cap for bottom pipe - exactly at the top
-                const capY = y;
-                
-                if (brickImage.complete) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.moveTo(capX, capY);
-                    ctx.lineTo(capX, capY + capHeight - ROUND_RADIUS);
-                    ctx.quadraticCurveTo(capX, capY + capHeight, capX + ROUND_RADIUS, capY + capHeight);
-                    ctx.lineTo(capX + capWidth - ROUND_RADIUS, capY + capHeight);
-                    ctx.quadraticCurveTo(capX + capWidth, capY + capHeight, capX + capWidth, capY + capHeight - ROUND_RADIUS);
-                    ctx.lineTo(capX + capWidth, capY);
-                    ctx.closePath();
-                    
-                    const pattern = ctx.createPattern(brickImage, 'repeat');
-                    ctx.fillStyle = pattern;
-                    ctx.fill();
-                    ctx.restore();
-                }
-            }
-            
-            ctx.restore();
-        }
 
         function drawGame() {
             const now = Date.now();
@@ -384,65 +290,49 @@
         function updateGame() {
             if (!gameStarted || gameOver) return;
 
-            // Обновление позиции свинки
+            // Update pig position
             pig.velocity += GRAVITY;
             pig.y += pig.velocity;
             
-            // Ограничение скорости падения
-            pig.velocity = Math.min(pig.velocity, 6);
+            // Rotate pig based on velocity
+            pig.rotation = Math.min(Math.max(pig.velocity * 0.2, -0.5), 0.5);
             
-            // Обновление поворота свинки
-            pig.rotation = Math.min(Math.PI/4, Math.max(-Math.PI/4, pig.velocity * 0.1));
-
-            // Проверка границ
-            if (pig.y + pig.radius > canvas.height - 60) {
+            // Check if pig hits the ground
+            if (pig.y + pig.radius > canvas.height) {
                 gameOver = true;
-                if (score > highScore) {
-                    highScore = score;
-                    localStorage.setItem('highScore', highScore);
-                }
                 playButton.style.display = 'block';
-                playButton.textContent = 'PLAY AGAIN';
-                bgMusic.pause();
                 return;
             }
 
-            if (pig.y - pig.radius < 0) {
-                pig.y = pig.radius;
-                pig.velocity = 0;
-            }
-
-            // Обновление труб
-            for (let i = pipes.length - 1; i >= 0; i--) {
-                const pipe = pipes[i];
+            // Move pipes
+            pipes.forEach(pipe => {
                 pipe.x -= PIPE_SPEED;
-
+                
+                // Check for collision
                 if (checkCollision(pipe)) {
-                    lives--;
-                    if (lives <= 0) {
-                        gameOver = true;
-                        if (score > highScore) {
-                            highScore = score;
-                            localStorage.setItem('highScore', highScore);
-                        }
-                        playButton.style.display = 'block';
-                        playButton.textContent = 'PLAY AGAIN';
-                        bgMusic.pause();
-                        return;
-                    }
-                    resetPigPosition();
+                    gameOver = true;
+                    playButton.style.display = 'block';
+                    return;
                 }
-
-                if (!pipe.passed && pipe.x + pipe.width < pig.x) {
-                    pipe.passed = true;
+                
+                // Update score
+                if (!pipe.passed && pipe.x + PIPE_WIDTH < pig.x) {
                     score++;
-                    updateScore();
+                    pipe.passed = true;
                 }
+            });
 
-                if (pipe.x + pipe.width < 0) {
-                    pipes.splice(i, 1);
-                }
+            // Remove off-screen pipes
+            pipes = pipes.filter(pipe => pipe.x + PIPE_WIDTH > 0);
+
+            // Add new pipes
+            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - PIPE_WIDTH) {
+                pipes.push(createPipe());
             }
+
+            // Request next frame
+            requestAnimationFrame(updateGame);
+            drawGame();
         }
 
         function updateScore() {
@@ -471,18 +361,6 @@
                 bgMusic.currentTime = 0;
                 bgMusic.play();
             }
-
-            // Очищаем предыдущие интервалы
-            if (window.pipeInterval) {
-                clearInterval(window.pipeInterval);
-            }
-
-            // Создаем новый интервал для труб
-            window.pipeInterval = setInterval(() => {
-                if (gameStarted && !gameOver) {
-                    pipes.push(createPipe());
-                }
-            }, PIPE_SPAWN_INTERVAL);
         }
 
         playButton.addEventListener('click', startGame);
@@ -602,6 +480,105 @@
 
         // Start loading process
         window.addEventListener('load', initializeGame);
+
+        // Загрузка изображений
+        const backgroundImage = new Image();
+        backgroundImage.src = 'static/images/background.png';
+        backgroundImage.onload = function() {
+            const bgAspectRatio = this.width / this.height;
+            window.drawBackground = function() {
+                const canvasAspectRatio = canvas.width / canvas.height;
+                let drawWidth = canvas.width;
+                let drawHeight = canvas.height;
+                let x = 0;
+                let y = 0;
+
+                if (canvasAspectRatio > bgAspectRatio) {
+                    drawHeight = canvas.width / bgAspectRatio;
+                    y = (canvas.height - drawHeight) / 2;
+                } else {
+                    drawWidth = canvas.height * bgAspectRatio;
+                    x = (canvas.width - drawWidth) / 2;
+                }
+
+                ctx.drawImage(backgroundImage, x, y, drawWidth, drawHeight);
+            };
+        };
+
+        const brickImage = new Image();
+        brickImage.src = 'static/images/bricks.png';
+
+        function drawPipeWithCap(x, y, width, height, isTop) {
+            ctx.save();
+            
+            // Draw main pipe body with brick pattern
+            if (brickImage.complete) {
+                ctx.save();
+                ctx.translate(x, 0);
+                const pattern = ctx.createPattern(brickImage, 'repeat');
+                ctx.fillStyle = pattern;
+                
+                // Привязываем текстуру к позиции колонны
+                const brickHeight = 32;
+                const startY = Math.floor(y / brickHeight) * brickHeight;
+                ctx.fillRect(0, startY, width, height + (y - startY));
+                ctx.restore();
+            }
+
+            // Draw decorative cap
+            const capHeight = 24;
+            const capWidth = width + 16;
+            const capX = x - 8;
+            const ROUND_RADIUS = 8;
+            
+            if (isTop) {
+                // Bottom cap for top pipe - exactly at the bottom
+                const capY = y + height - capHeight;
+                
+                if (brickImage.complete) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(capX, capY + capHeight);
+                    ctx.lineTo(capX, capY + ROUND_RADIUS);
+                    ctx.quadraticCurveTo(capX, capY, capX + ROUND_RADIUS, capY);
+                    ctx.lineTo(capX + capWidth - ROUND_RADIUS, capY);
+                    ctx.quadraticCurveTo(capX + capWidth, capY, capX + capWidth, capY + ROUND_RADIUS);
+                    ctx.lineTo(capX + capWidth, capY + capHeight);
+                    ctx.closePath();
+                    
+                    // Привязываем текстуру к позиции шапки
+                    const pattern = ctx.createPattern(brickImage, 'repeat');
+                    ctx.fillStyle = pattern;
+                    ctx.translate(0, Math.floor(capY / 32) * 32);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            } else {
+                // Top cap for bottom pipe - exactly at the top
+                const capY = y;
+                
+                if (brickImage.complete) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(capX, capY);
+                    ctx.lineTo(capX, capY + capHeight - ROUND_RADIUS);
+                    ctx.quadraticCurveTo(capX, capY + capHeight, capX + ROUND_RADIUS, capY + capHeight);
+                    ctx.lineTo(capX + capWidth - ROUND_RADIUS, capY + capHeight);
+                    ctx.quadraticCurveTo(capX + capWidth, capY + capHeight, capX + capWidth, capY + capHeight - ROUND_RADIUS);
+                    ctx.lineTo(capX + capWidth, capY);
+                    ctx.closePath();
+                    
+                    // Привязываем текстуру к позиции шапки
+                    const pattern = ctx.createPattern(brickImage, 'repeat');
+                    ctx.fillStyle = pattern;
+                    ctx.translate(0, Math.floor(capY / 32) * 32);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+            
+            ctx.restore();
+        }
     </script>
 </body>
 </html>
