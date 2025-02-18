@@ -274,7 +274,7 @@
             pigSprites.push(sprite);
         }
         let currentPigFrame = 0;
-        const ANIMATION_SPEED = 100; // ms per frame
+        const ANIMATION_SPEED = 150; // ms per frame
         let lastFrameTime = 0;
 
         function drawPipeWithCap(x, y, width, height, isTop) {
@@ -284,83 +284,75 @@
             const brickHeight = 32;
             const brickPattern = Math.floor(y / brickHeight) * brickHeight;
             
-            // Draw the main pipe body
-            ctx.fillStyle = '#4a8505';
-            ctx.fillRect(x, y, width, height);
-
-            // Apply brick texture with fixed pattern
             if (brickImage.complete) {
+                // Draw bricks aligned to grid
                 ctx.save();
-                // Use pattern alignment based on absolute position
                 ctx.translate(x, 0);
                 const pattern = ctx.createPattern(brickImage, 'repeat');
                 ctx.fillStyle = pattern;
-                ctx.globalAlpha = 0.3;
-                // Draw bricks aligned to grid
                 ctx.fillRect(0, brickPattern, width, height);
                 ctx.restore();
             }
 
             // Draw decorative cap
-            const capHeight = 48;
+            const capHeight = 32;
             const capWidth = width + 16;
             const capX = x - 8;
             
-            ctx.fillStyle = '#4a8505';
             if (isTop) {
                 // Bottom cap for top pipe
                 const capY = y + height - capHeight;
                 
-                // Draw main cap shape
-                ctx.beginPath();
-                ctx.moveTo(capX, capY + capHeight);
-                ctx.lineTo(capX, capY + 8);
-                ctx.quadraticCurveTo(capX, capY, capX + 8, capY);
-                ctx.lineTo(capX + capWidth - 8, capY);
-                ctx.quadraticCurveTo(capX + capWidth, capY, capX + capWidth, capY + 8);
-                ctx.lineTo(capX + capWidth, capY + capHeight);
-                ctx.fill();
-                
-                // Apply brick texture to cap
+                // Draw main cap
                 if (brickImage.complete) {
                     ctx.save();
                     ctx.translate(capX, 0);
                     const pattern = ctx.createPattern(brickImage, 'repeat');
                     ctx.fillStyle = pattern;
-                    ctx.globalAlpha = 0.3;
                     ctx.fillRect(0, capY, capWidth, capHeight);
                     ctx.restore();
                 }
+                
+                // Draw cap edges
+                ctx.strokeStyle = '#2d5202';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(capX, capY + capHeight);
+                ctx.lineTo(capX, capY);
+                ctx.lineTo(capX + capWidth, capY);
+                ctx.lineTo(capX + capWidth, capY + capHeight);
+                ctx.stroke();
             } else {
                 // Top cap for bottom pipe
                 const capY = y;
                 
-                // Draw main cap shape
-                ctx.beginPath();
-                ctx.moveTo(capX, capY);
-                ctx.lineTo(capX, capY + capHeight - 8);
-                ctx.quadraticCurveTo(capX, capY + capHeight, capX + 8, capY + capHeight);
-                ctx.lineTo(capX + capWidth - 8, capY + capHeight);
-                ctx.quadraticCurveTo(capX + capWidth, capY + capHeight, capX + capWidth, capY + capHeight - 8);
-                ctx.lineTo(capX + capWidth, capY);
-                ctx.fill();
-                
-                // Apply brick texture to cap
+                // Draw main cap
                 if (brickImage.complete) {
                     ctx.save();
                     ctx.translate(capX, 0);
                     const pattern = ctx.createPattern(brickImage, 'repeat');
                     ctx.fillStyle = pattern;
-                    ctx.globalAlpha = 0.3;
                     ctx.fillRect(0, capY, capWidth, capHeight);
                     ctx.restore();
                 }
+                
+                // Draw cap edges
+                ctx.strokeStyle = '#2d5202';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(capX, capY);
+                ctx.lineTo(capX, capY + capHeight);
+                ctx.lineTo(capX + capWidth, capY + capHeight);
+                ctx.lineTo(capX + capWidth, capY);
+                ctx.stroke();
             }
             
             ctx.restore();
         }
 
         function drawGame() {
+            const now = Date.now();
+            
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             // Draw background
@@ -374,21 +366,21 @@
                 drawPipeWithCap(pipe.x, pipe.bottomY, PIPE_WIDTH, canvas.height - pipe.bottomY, false);
             });
 
-            // Draw animated pig
-            const now = Date.now();
+            // Update pig animation frame
             if (now - lastFrameTime > ANIMATION_SPEED) {
                 currentPigFrame = (currentPigFrame + 1) % pigSprites.length;
                 lastFrameTime = now;
             }
 
-            ctx.save();
-            ctx.translate(pig.x, pig.y);
-            ctx.rotate(pig.rotation);
+            // Draw pig only if sprite is loaded
             const sprite = pigSprites[currentPigFrame];
-            if (sprite.complete) {
+            if (sprite && sprite.complete) {
+                ctx.save();
+                ctx.translate(pig.x, pig.y);
+                ctx.rotate(pig.rotation);
                 ctx.drawImage(sprite, -pig.radius, -pig.radius, pig.radius * 2, pig.radius * 2);
+                ctx.restore();
             }
-            ctx.restore();
 
             // Update score display
             updateScore();
