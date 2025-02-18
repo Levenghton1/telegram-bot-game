@@ -463,13 +463,19 @@
         // Function to check if a file exists
         async function checkResource(resource) {
             try {
-                const response = await fetch(resource.src);
-                if (!response.ok) throw new Error(`Failed to load ${resource.name}`);
-                return true;
+                const response = await fetch(resource.src, {
+                    method: 'HEAD',  // Only fetch headers to check existence
+                    cache: 'no-cache' // Prevent caching issues
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return { success: true };
             } catch (error) {
-                loadingText.textContent = `Error loading ${resource.name}`;
-                console.error(error);
-                return false;
+                return { 
+                    success: false, 
+                    error: `Failed to load ${resource.name} (${resource.src}): ${error.message}`
+                };
             }
         }
 
@@ -477,53 +483,61 @@
         async function checkAllResources() {
             const totalResources = resources.images.length + resources.audio.length + resources.scripts.length;
             let loadedResources = 0;
+            let errors = [];
 
             // Check images
             for (const img of resources.images) {
                 loadingText.textContent = `Checking ${img.name}...`;
-                if (await checkResource(img)) {
+                const result = await checkResource(img);
+                if (result.success) {
                     loadedResources++;
                     progressBar.style.width = `${(loadedResources / totalResources) * 100}%`;
                 } else {
-                    return false;
+                    errors.push(result.error);
                 }
             }
 
             // Check audio
             for (const audio of resources.audio) {
                 loadingText.textContent = `Checking ${audio.name}...`;
-                if (await checkResource(audio)) {
+                const result = await checkResource(audio);
+                if (result.success) {
                     loadedResources++;
                     progressBar.style.width = `${(loadedResources / totalResources) * 100}%`;
                 } else {
-                    return false;
+                    errors.push(result.error);
                 }
             }
 
             // Check scripts
             for (const script of resources.scripts) {
                 loadingText.textContent = `Checking ${script.name}...`;
-                if (await checkResource(script)) {
+                const result = await checkResource(script);
+                if (result.success) {
                     loadedResources++;
                     progressBar.style.width = `${(loadedResources / totalResources) * 100}%`;
                 } else {
-                    return false;
+                    errors.push(result.error);
                 }
             }
 
-            return true;
+            return { success: errors.length === 0, errors };
         }
 
         // Initialize game only after resources are checked
         async function initializeGame() {
-            const resourcesLoaded = await checkAllResources();
+            const result = await checkAllResources();
             
-            if (!resourcesLoaded) {
-                loadingText.textContent = 'Failed to load some resources. Please refresh the page.';
+            if (!result.success) {
+                loadingText.innerHTML = 'Failed to load resources:<br>' + 
+                    result.errors.map(err => `• ${err}`).join('<br>') +
+                    '<br><br>Please check your connection and refresh the page.';
+                progressBar.style.backgroundColor = '#ff4444';
                 return;
             }
 
             loadingText.textContent = 'All resources loaded!';
+            progressBar.style.width = '100%';
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
                 // Initialize the rest of the game
@@ -537,7 +551,8 @@
             }, 500);
         }
 
-        initializeGame();
+        // Start loading process
+        window.addEventListener('load', initializeGame);
     </script>
 </body>
 </html>
